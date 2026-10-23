@@ -9,5 +9,5 @@ class Bicicleta(models.Model):
     color = models.CharField(max_length=30)
     qr_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
 
-    def __str__(self):
+def __str__(self):
         return f"{self.marca} ({self.numero_folio})"

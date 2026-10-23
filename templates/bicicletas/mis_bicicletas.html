@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mis Bicicletas - UniPass</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Mis Bicicletas Registradas</h2>
+        <a href="{% url 'registrar_bicicleta' %}" class="btn btn-success">+ Registrar Nueva Bicicleta</a>
+    </div>
+
+    {% if bicicletas %}
+        <table class="table table-striped border">
+            <thead>
+                <tr>
+                    <th>Folio</th>
+                    <th>Marca</th>
+                    <th>Color</th>
+                    <th>Token QR</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for bici in bicicletas %}
+                <tr>
+                    <td>{{ bici.numero_folio }}</td>
+                    <td>{{ bici.marca }}</td>
+                    <td>{{ bici.color }}</td>
+                    <td><code>{{ bici.qr_token }}</code></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="alert alert-info">
+            No tienes bicicletas registradas aún. ¡Haz clic en el botón verde para registrar una!
+        </div>
+    {% endif %}
+</body>
+</html>

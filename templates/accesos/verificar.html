@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniPass - Control de Acceso</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-body p-4 text-center">
+                        <h3 class="card-title mb-3">🛡️ Control de Acceso UniPass</h3>
+                        <p class="text-muted">Ingrese o escanee el folio/token de la bicicleta para validar el ingreso.</p>
+                        
+                        <form method="POST" class="mt-4">
+                            {% csrf_token %}
+                            <div class="input-group mb-3">
+                                <input type="text" name="folio" class="form-control form-control-lg text-center" 
+                                       placeholder="Ej. 172" value="{{ folio_buscado }}" required autofocus>
+                                <button class="btn btn-primary btn-lg" type="submit">Verificar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                {% if resultado == 'permitido' %}
+                    <div class="card border-success shadow-sm text-center">
+                        <div class="card-header bg-success text-white fw-bold fs-5">
+                            ✅ ACCESO PERMITIDO
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">{{ bicicleta.marca }} - {{ bicicleta.color }}</h5>
+                            <p class="card-text mb-1"><strong>Folio:</strong> #{{ bicicleta.numero_folio }}</p>
+                            <p class="card-text mb-1"><strong>Propietario:</strong> {{ bicicleta.usuario }}</p>
+                            <p class="card-text"><small class="text-muted">Registro verificado en sistema</small></p>
+                        </div>
+                    </div>
+                {% elif resultado == 'denegado' %}
+                    <div class="card border-danger shadow-sm text-center">
+                        <div class="card-header bg-danger text-white fw-bold fs-5">
+                            ⛔ ACCESO DENEGADO
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text text-danger mb-0">No se encontró ninguna bicicleta activa registrada con el folio <strong>#{{ folio_buscado }}</strong>.</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>
