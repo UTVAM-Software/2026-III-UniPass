@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>UNIPASS - Iniciar Sesión</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="bg-light d-flex align-items-center vh-100">
+    <div class="container d-flex justify-content-center">
+        <div class="card shadow p-4" style="width: 380px;">
+            <h3 class="text-center mb-4 font-weight-bold">UNIPASS</h3>
+            
+            {% if form.errors %}
+                <div class="alert alert-danger p-2 text-center" style="font-size: 0.9rem;">
+                    Usuario o contraseña incorrectos.
+                </div>
+            {% endif %}
+
+    <form method="post" action="{% url 'login' %}">
+    {% csrf_token %}
+    
+    <div class="mb-3">
+        <label class="form-label">Usuario</label>
+        <input type="text" name="username" class="form-control" required>
+    </div>
+    
+    <div class="mb-3">
+        <label class="form-label">Contraseña</label>
+        <input type="password" name="password" class="form-control" required>
+    </div>
+    
+    <button type="submit" class="btn btn-primary w-100">Iniciar Sesión</button>
+</form>
+        </div>
+    </div>
+</body>
+</html>

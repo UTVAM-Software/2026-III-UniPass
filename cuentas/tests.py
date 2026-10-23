@@ -1,3 +1,7 @@
-from django.test import TestCase
+from django.urls import path
+from . import views
 
-# Create your tests here.
+urlpatterns = [
+    # ... tus otras rutas (login, logout, etc.)
+    path('usuarios/', views.lista_usuarios, name='lista_usuarios'),
+]

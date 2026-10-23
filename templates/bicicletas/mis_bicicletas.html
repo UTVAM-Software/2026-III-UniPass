@@ -1,41 +1,124 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Mis Bicicletas - UniPass</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-</head>
-<body class="container mt-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Mis Bicicletas Registradas</h2>
-        <a href="{% url 'registrar_bicicleta' %}" class="btn btn-success">+ Registrar Nueva Bicicleta</a>
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Si el usuario es Administrador / Administrativo -->
+    {% if request.user.perfilusuario.rol == 'admin' or request.user.perfilusuario.rol == 'administrativo' or request.user.perfil.rol == 'admin' or request.user.perfil.rol == 'administrativo' %}
+        
+        <div class="p-5 mb-4 bg-light rounded-3 border shadow-sm">
+            <div class="container-fluid py-2">
+                <h1 class="display-5 fw-bold text-primary">👋 ¡Bienvenido, Administrador!</h1>
+                <p class="col-md-8 fs-4 text-muted">
+                    Panel principal del sistema <strong>UniPass</strong>. Desde aquí puedes gestionar los registros del sistema y supervisar los accesos.
+                </p>
+            </div>
+        </div>
+
+        <h4 class="fw-bold mb-3">Acciones Rápidas</h4>
+<div class="row g-4">
+    <!-- Tarjeta 1: Registro -->
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm border-0 border-start border-4 border-primary">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-primary text-white rounded-circle p-3 me-3">
+                        <i class="bi bi-plus-circle-fill fs-3"></i>
+                    </div>
+                    <h5 class="card-title fw-bold mb-0">Módulo de Registro</h5>
+                </div>
+                <p class="card-text text-muted">Da de alta a nuevos alumnos y sus bicicletas asociadas.</p>
+                <a href="{% url 'registrar_bicicleta' %}" class="btn btn-primary fw-bold w-100 mt-2">
+                    ➕ Registrar
+                </a>
+            </div>
+        </div>
     </div>
 
-    {% if bicicletas %}
-        <table class="table table-striped border">
-            <thead>
-                <tr>
-                    <th>Folio</th>
-                    <th>Marca</th>
-                    <th>Color</th>
-                    <th>Token QR</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for bici in bicicletas %}
-                <tr>
-                    <td>{{ bici.numero_folio }}</td>
-                    <td>{{ bici.marca }}</td>
-                    <td>{{ bici.color }}</td>
-                    <td><code>{{ bici.qr_token }}</code></td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <div class="alert alert-info">
-            No tienes bicicletas registradas aún. ¡Haz clic en el botón verde para registrar una!
+    <!-- Tarjeta 2: Control de Accesos -->
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm border-0 border-start border-4 border-success">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-success text-white rounded-circle p-3 me-3">
+                        <i class="bi bi-shield-check fs-3"></i>
+                    </div>
+                    <h5 class="card-title fw-bold mb-0">Control de Accesos</h5>
+                </div>
+                <p class="card-text text-muted">Consulta la validez de los folios o escanea códigos QR.</p>
+                <a href="{% url 'verificar_acceso' %}" class="btn btn-success fw-bold w-100 mt-2">
+                    🔍 Verificar Folio
+                </a>
+            </div>
         </div>
+    </div>
+
+    <!-- Tarjeta 3: Gestión de Usuarios (NUEVO BOTÓN) -->
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm border-0 border-start border-4 border-info">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-info text-white rounded-circle p-3 me-3">
+                        <i class="bi bi-people-fill fs-3"></i>
+                    </div>
+                    <h5 class="card-title fw-bold mb-0">Usuarios y Roles</h5>
+                </div>
+                <p class="card-text text-muted">Consulta la lista completa de usuarios y sus permisos.</p>
+                <a href="{% url 'lista_usuarios' %}" class="btn btn-info text-white fw-bold w-100 mt-2">
+                    👥 Ver Lista de Usuarios
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+            <!-- Tarjeta 2: Control de Accesos -->
+            <div class="col-md-6">
+                <div class="card h-100 shadow-sm border-0 border-start border-4 border-success">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-success text-white rounded-circle p-3 me-3">
+                                <i class="bi bi-shield-check fs-3"></i>
+                            </div>
+                            <h5 class="card-title fw-bold mb-0">Verificación de Accesos</h5>
+                        </div>
+                        <p class="card-text text-muted">Consulta la validez de los folios o escanea códigos QR de las bicicletas en la entrada.</p>
+                        <a href="{% url 'verificar_acceso' %}" class="btn btn-success fw-bold w-100 mt-2">
+                            🔍 Consultar / Escanear Folio
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <!-- Si el usuario es Alumno (Vista normal de sus bicicletas) -->
+    {% else %}
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="fw-bold mb-0">🚲 Mis Bicicletas Registradas</h3>
+        </div>
+
+        {% if bicicletas %}
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                {% for bicicleta in bicicletas %}
+                    <div class="col">
+                        <div class="card h-100 shadow-sm border-0">
+                            <div class="card-body">
+                                <h5 class="card-title fw-bold">{{ bicicleta.marca }}</h5>
+                                <p class="card-text text-muted">Color: {{ bicicleta.color }}</p>
+                                <span class="badge bg-secondary">Folio: {{ bicicleta.numero_folio }}</span>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info shadow-sm" role="alert">
+                Aún no tienes bicicletas asociadas a tu cuenta. Acude con un administrador para registrar tu bicicleta.
+            </div>
+        {% endif %}
+
     {% endif %}
-</body>
-</html>
+
+</div>
+{% endblock %}
