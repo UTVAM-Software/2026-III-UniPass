@@ -54,7 +54,7 @@ El repositorio incluye una base de datos SQLite lista para pruebas inmediatas co
 | :--- | :--- | :--- |
 | Administrador | `admin1` | `AdminPassword123!` |
 | Guardia / Vigilancia | `guardia1` | `Password123!` |
-| Estudiante / Usuario | `213110229` | `UniPass2026!` |
+
 
 ---
 
