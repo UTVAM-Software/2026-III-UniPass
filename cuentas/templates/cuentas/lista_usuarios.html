@@ -29,12 +29,16 @@
                             <td>{{ usuario.email|default:"—" }}</td>
                             <td>{{ usuario.matricula_perfil }}</td>
                             <td><span class="badge bg-secondary">{{ usuario.nombre_grupo }}</span></td>
-                            <td class="text-end">
-                                <form method="post" action="{% url 'eliminar_usuario' usuario.pk %}" onsubmit="return confirm('¿Eliminar esta cuenta?');">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-outline-danger btn-sm">Eliminar</button>
-                                </form>
-                            </td>
+                           <td class="text-end">
+                        <form method="post" action="{% url 'restablecer_clave_usuario' usuario.pk %}" class="d-inline" onsubmit="return confirm('¿Restablecer la contraseña de {{ usuario.username }} a UniPass2026!?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-secondary btn-sm me-1">Restablecer clave</button>
+                        </form>
+                        <form method="post" action="{% url 'eliminar_usuario' usuario.pk %}" class="d-inline" onsubmit="return confirm('¿Eliminar a {{ usuario.username }}?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-danger btn-sm">Eliminar</button>
+                        </form>
+                    </td>
                         </tr>
                     {% empty %}
                         <tr>

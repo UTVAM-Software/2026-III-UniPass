@@ -14,14 +14,68 @@
             flex-direction: column;
         }
         .content-wrapper { flex: 1; }
-        .navbar-brand span { color: #cd1616fc; }
+        .navbar-brand span { color: #6F1D32 }
     </style>
+    <style>
+  :root {
+    --unipass-vino: #6F1D32;
+    --unipass-vino-oscuro: #4E1222;
+    --unipass-negro: #18181B;
+    --unipass-blanco: #FFFFFF;
+    --unipass-fondo: #F8F9FA;
+  }
+
+  body {
+    background-color: var(--unipass-fondo);
+    color: var(--unipass-negro);
+  }
+/* Barra de navegación superior en color vino */
+  .navbar, .navbar.bg-dark, nav {
+    background-color: var(--unipass-vino) !important;
+    border-bottom: 3px solid var(--unipass-negro);
+  }
+
+  /* Enlaces y textos de la barra en blanco */
+  .navbar .navbar-brand,
+  .navbar .nav-link,
+  .navbar .navbar-text {
+    color: var(--unipass-blanco) !important;
+  }
+
+  .navbar .nav-link:hover {
+    color: #F3D5DC !important;
+  }
+  /* Botones principales (cambia los botones azules a vino) */
+  .btn-primary {
+    background-color: var(--unipass-vino) !important;
+    border-color: var(--unipass-vino) !important;
+    color: var(--unipass-blanco) !important;
+  }
+
+  .btn-primary:hover, .btn-primary:focus {
+    background-color: var(--unipass-vino-oscuro) !important;
+    border-color: var(--unipass-vino-oscuro) !important;
+  }
+
+  /* Encabezados de tablas y tarjetas destacadas */
+  .table-dark, thead.table-dark th {
+    background-color: var(--unipass-vino) !important;
+    border-color: var(--unipass-vino-oscuro) !important;
+    color: var(--unipass-blanco) !important;
+  }
+
+  /* Etiquetas de rol o badges */
+  .badge.bg-primary {
+    background-color: var(--unipass-vino) !important;
+  }
+</style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
         <div class="container">
             <a class="navbar-brand fw-bold fs-4" href="{% url 'login' %}">
-                Uni<span>Pass</span>
+                Uni<span style="color: #FFD6E0; font-weight: 700;">Pass</span>
+               
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir menú">
                 <span class="navbar-toggler-icon"></span>
@@ -72,7 +126,7 @@
                             <button type="submit" class="btn btn-outline-light btn-sm">Salir</button>
                         </form>
                     {% else %}
-                        <a href="{% url 'login' %}" class="btn btn-primary btn-sm">Iniciar sesión</a>
+                        
                     {% endif %}
                 </div>
             </div>

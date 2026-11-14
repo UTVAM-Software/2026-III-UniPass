@@ -4,14 +4,30 @@
 
 {% block content %}
 <div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
         <h1 class="h3 fw-bold mb-0">Historial de accesos</h1>
-        <a href="{% url 'verificar_acceso' %}" class="btn btn-primary">Escanear</a>
+        <a href="{% url 'verificar_acceso' %}" class="btn text-white" style="background-color: #6F1D32;">Escanear</a>
     </div>
+
+    <form method="get" class="row g-2 mb-3 align-items-center">
+        <div class="col-md-5">
+            <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Buscar por folio, matrícula, alumno o movimiento...">
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-dark">Buscar</button>
+            {% if q %}
+                <a href="{% url 'historial_accesos' %}" class="btn btn-outline-secondary">Limpiar</a>
+            {% endif %}
+        </div>
+        <div class="col-auto">
+            <span class="text-muted small">{{ registros.paginator.count }} registro(s)</span>
+        </div>
+    </form>
+
     <div class="card border-0 shadow-sm">
         <div class="table-responsive">
             <table class="table table-hover mb-0 align-middle text-center">
-                <thead class="table-dark">
+                <thead style="background-color: #6F1D32; color: #fff;">
                     <tr>
                         <th>Folio</th>
                         <th>Propietario</th>
@@ -24,7 +40,7 @@
                 <tbody>
                     {% for reg in registros %}
                         <tr>
-                            <td>{{ reg.bicicleta.numero_folio }}</td>
+                            <td class="fw-semibold">{{ reg.bicicleta.numero_folio }}</td>
                             <td>{{ reg.bicicleta.usuario.user.get_full_name|default:reg.bicicleta.usuario.user.username }}</td>
                             <td>{{ reg.bicicleta.marca }} ({{ reg.bicicleta.color }})</td>
                             <td>
@@ -39,12 +55,39 @@
                         </tr>
                     {% empty %}
                         <tr>
-                            <td colspan="6" class="text-muted py-4">Todavía no hay entradas ni salidas.</td>
+                            <td colspan="6" class="text-muted py-4">
+                                {% if q %}
+                                    No se encontraron movimientos para "{{ q }}".
+                                {% else %}
+                                    Todavía no hay entradas ni salidas.
+                                {% endif %}
+                            </td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
+
+    {% if registros.paginator.num_pages > 1 %}
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <span class="text-muted small">
+                Página {{ registros.number }} de {{ registros.paginator.num_pages }}
+            </span>
+            <div class="btn-group btn-group-sm">
+                {% if registros.has_previous %}
+                    <a class="btn btn-outline-secondary" href="?page={{ registros.previous_page_number }}{% if q %}&q={{ q|urlencode }}{% endif %}">Anterior</a>
+                {% else %}
+                    <button class="btn btn-outline-secondary" disabled>Anterior</button>
+                {% endif %}
+
+                {% if registros.has_next %}
+                    <a class="btn btn-outline-secondary" href="?page={{ registros.next_page_number }}{% if q %}&q={{ q|urlencode }}{% endif %}">Siguiente</a>
+                {% else %}
+                    <button class="btn btn-outline-secondary" disabled>Siguiente</button>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
 </div>
 {% endblock %}

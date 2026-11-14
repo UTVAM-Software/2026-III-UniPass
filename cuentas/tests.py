@@ -142,11 +142,17 @@ class CaracteresEspecialesTests(TestCase):
                 "password1": "",
                 "password2": "",
             },
+            initial={
+                "first_name": "Freddy",
+                "last_name": "Fragoso",
+                "email": "freddy@utvam.edu.mx",
+                "matricula": "A001",
+            },
             puede_editar_matricula=True,
         )
-        self.assertFalse(form.is_valid())
-        self.assertIn("first_name", form.errors)
-        self.assertIn("last_name", form.errors)
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data["first_name"], "Freddy")
+        self.assertEqual(form.cleaned_data["last_name"], "Fragoso")
 
     def test_perfil_rechaza_simbolos_de_inyeccion_en_la_contrasena(self):
         from cuentas.forms import PerfilForm

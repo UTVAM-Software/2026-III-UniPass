@@ -86,21 +86,28 @@ def nuevo_usuario(request):
         return redirect("lista_usuarios")
 
     return render(request, "cuentas/nuevo_usuario.html", {"form": form})
-
-
-@requiere(GESTIONAR_USUARIOS)
 @require_POST
+@requiere(GESTIONAR_USUARIOS)
 def eliminar_usuario(request, pk):
-    objetivo = get_object_or_404(User, pk=pk)
-    if objetivo.pk == request.user.pk or objetivo.is_superuser or objetivo.groups.filter(name=ADMINISTRADOR).exists():
-        messages.error(request, "Esa cuenta no se puede eliminar desde aquí.")
-        return redirect("lista_usuarios")
-
-    nombre = objetivo.username
-    objetivo.delete()
-    messages.success(request, f"Se eliminó la cuenta {nombre}.")
+    usuario = get_object_or_404(User, pk=pk)
+    if usuario != request.user:
+        usuario.delete()
+        messages.success(request, "Usuario eliminado correctamente.")
     return redirect("lista_usuarios")
 
+
+@require_POST
+@requiere(GESTIONAR_USUARIOS)
+def restablecer_clave_usuario(request, pk):
+    usuario = get_object_or_404(User, pk=pk)
+    clave_temporal = "UniPass2026!"
+    usuario.set_password(clave_temporal)
+    usuario.save()
+    messages.success(
+        request,
+        f"Contraseña de {usuario.username} restablecida a: {clave_temporal}",
+    )
+    return redirect("lista_usuarios")
 
 @requiere(EDITAR_PERFIL)
 def editar_perfil(request):

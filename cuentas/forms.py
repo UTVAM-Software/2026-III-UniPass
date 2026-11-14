@@ -66,19 +66,19 @@ class NuevoUsuarioForm(forms.ModelForm):
 
 
 class PerfilForm(forms.Form):
-    first_name = forms.CharField(label="Nombre(s)", max_length=150, widget=forms.TextInput(attrs={"class": "form-control", "pattern": "[A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9 \\-]+", "maxlength": "150"}))
-    last_name = forms.CharField(label="Apellidos", max_length=150, required=False, widget=forms.TextInput(attrs={"class": "form-control", "pattern": "[A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9 \\-]+", "maxlength": "150"}))
-    email = forms.EmailField(label="Correo", required=False, widget=forms.EmailInput(attrs={"class": "form-control", "maxlength": "254"}))
-    matricula = forms.CharField(label="Matrícula", max_length=20, required=False, widget=forms.TextInput(attrs={"class": "form-control", "pattern": "[A-Za-z0-9-]{1,20}", "maxlength": "20"}))
+    first_name = forms.CharField(label="Nombre(s)", max_length=150, disabled=True, widget=forms.TextInput(attrs={"class": "form-control"}))
+    last_name = forms.CharField(label="Apellidos", max_length=150, required=False, disabled=True, widget=forms.TextInput(attrs={"class": "form-control"}))
+    email = forms.EmailField(label="Correo", required=False, disabled=True, widget=forms.EmailInput(attrs={"class": "form-control"}))
+    matricula = forms.CharField(label="Matrícula", max_length=20, required=False, disabled=True, widget=forms.TextInput(attrs={"class": "form-control"}))
     password1 = forms.CharField(label="Nueva contraseña", required=False, widget=forms.PasswordInput(attrs={"class": "form-control"}))
     password2 = forms.CharField(label="Confirmar contraseña", required=False, widget=forms.PasswordInput(attrs={"class": "form-control"}))
 
     def __init__(self, *args, user=None, puede_editar_matricula=False, **kwargs):
-        self.user = user
         super().__init__(*args, **kwargs)
-        if not puede_editar_matricula:
-            self.fields["matricula"].disabled = True
-            self.fields["matricula"].help_text = "Solo un administrador puede cambiar la matrícula."
+        self.user = user
+        for campo in ["first_name", "last_name", "email", "matricula"]:
+            if campo in self.fields:
+                self.fields[campo].disabled = True
 
     def clean_first_name(self):
         return texto_seguro(self.cleaned_data.get("first_name"))

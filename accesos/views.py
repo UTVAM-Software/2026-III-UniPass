@@ -1,8 +1,12 @@
+from datetime import timedelta
 import re
 import uuid
 
 from django.contrib import messages
+from django.core.paginator import Paginator
+from django.db.models import Q
 from django.shortcuts import redirect, render
+from django.utils import timezone
 
 from bicicletas.models import Bicicleta
 from cuentas.permisos import ESCANEAR, VER_HISTORIAL, requiere
@@ -37,11 +41,29 @@ def _buscar_folio(valor):
 
 @requiere(VER_HISTORIAL)
 def historial_accesos(request):
+    q = (request.GET.get("q") or "").strip()
     registros = RegistroAcceso.objects.select_related(
         "bicicleta__usuario__user",
         "registrado_por",
+    ).order_by("-fecha_hora")
+
+    if q:
+        registros = registros.filter(
+            Q(bicicleta__numero_folio__icontains=q)
+            | Q(bicicleta__usuario__matricula__icontains=q)
+            | Q(bicicleta__usuario__user__first_name__icontains=q)
+            | Q(bicicleta__usuario__user__last_name__icontains=q)
+            | Q(bicicleta__usuario__user__username__icontains=q)
+            | Q(tipo_acceso__icontains=q)
+        )
+
+    paginator = Paginator(registros, 25)
+    page_obj = paginator.get_page(request.GET.get("page"))
+    return render(
+        request,
+        "accesos/historial.html",
+        {"registros": page_obj, "q": q},
     )
-    return render(request, "accesos/historial.html", {"registros": registros})
 
 
 @requiere(ESCANEAR)
@@ -84,6 +106,11 @@ def verificar_acceso(request):
 
 def _registrar_movimiento(request, bicicleta, accion):
     ultimo = bicicleta.accesos.order_by("-fecha_hora").first()
+
+    if ultimo and (timezone.now() - ultimo.fecha_hora) < timedelta(seconds=30):
+        messages.warning(request, "Espera al menos 30 segundos antes de registrar otro movimiento para esta bicicleta.")
+        return
+
     if accion == "registrar_entrada":
         if ultimo and ultimo.tipo_acceso == RegistroAcceso.ENTRADA:
             messages.error(request, "Esa bicicleta ya tiene una entrada abierta.")
