@@ -65,19 +65,72 @@ class NuevoUsuarioForm(forms.ModelForm):
         return limpio
 
 
+class EditarUsuarioForm(forms.Form):
+    first_name = forms.CharField(
+        label="Nombre(s)",
+        max_length=150,
+        required=False,
+        widget=forms.TextInput(attrs={"class": "form-control", "maxlength": "150"}),
+    )
+    last_name = forms.CharField(
+        label="Apellidos",
+        max_length=150,
+        required=False,
+        widget=forms.TextInput(attrs={"class": "form-control", "maxlength": "150"}),
+    )
+    email = forms.EmailField(
+        label="Correo",
+        required=False,
+        widget=forms.EmailInput(attrs={"class": "form-control", "maxlength": "254"}),
+    )
+    matricula = forms.CharField(
+        label="Matrícula",
+        max_length=20,
+        required=False,
+        widget=forms.TextInput(attrs={"class": "form-control", "maxlength": "20"}),
+    )
+    tipo = forms.ChoiceField(
+        label="Grupo",
+        choices=[(ALUMNO, "Alumnos"), (GUARDIA, "Seguridad")],
+        widget=forms.Select(attrs={"class": "form-select"}),
+    )
+
+    def clean_first_name(self):
+        return texto_seguro(self.cleaned_data.get("first_name"), vacio=True)
+
+    def clean_last_name(self):
+        return texto_seguro(self.cleaned_data.get("last_name"), vacio=True)
+
+    def clean_email(self):
+        return correo_seguro(self.cleaned_data.get("email"), vacio=True)
+
+    def clean_matricula(self):
+        valor = self.cleaned_data.get("matricula")
+        if not (valor or "").strip():
+            return ""
+        return folio_seguro(valor, "La matrícula solo puede tener letras, números y guiones.")
+
+    def clean(self):
+        limpio = super().clean()
+        if limpio.get("tipo") == ALUMNO and not (limpio.get("matricula") or "").strip():
+            self.add_error("matricula", "La matrícula es obligatoria para un alumno.")
+        return limpio
+
+
 class PerfilForm(forms.Form):
-    first_name = forms.CharField(label="Nombre(s)", max_length=150, disabled=True, widget=forms.TextInput(attrs={"class": "form-control"}))
-    last_name = forms.CharField(label="Apellidos", max_length=150, required=False, disabled=True, widget=forms.TextInput(attrs={"class": "form-control"}))
-    email = forms.EmailField(label="Correo", required=False, disabled=True, widget=forms.EmailInput(attrs={"class": "form-control"}))
-    matricula = forms.CharField(label="Matrícula", max_length=20, required=False, disabled=True, widget=forms.TextInput(attrs={"class": "form-control"}))
+    first_name = forms.CharField(label="Nombre(s)", max_length=150, widget=forms.TextInput(attrs={"class": "form-control"}))
+    last_name = forms.CharField(label="Apellidos", max_length=150, required=False, widget=forms.TextInput(attrs={"class": "form-control"}))
+    email = forms.EmailField(label="Correo", required=False, widget=forms.EmailInput(attrs={"class": "form-control"}))
+    matricula = forms.CharField(label="Matrícula", max_length=20, required=False, widget=forms.TextInput(attrs={"class": "form-control"}))
     password1 = forms.CharField(label="Nueva contraseña", required=False, widget=forms.PasswordInput(attrs={"class": "form-control"}))
     password2 = forms.CharField(label="Confirmar contraseña", required=False, widget=forms.PasswordInput(attrs={"class": "form-control"}))
 
-    def __init__(self, *args, user=None, puede_editar_matricula=False, **kwargs):
+    def __init__(self, *args, user=None, puede_editar=False, puede_editar_matricula=False, **kwargs):
         super().__init__(*args, **kwargs)
         self.user = user
-        for campo in ["first_name", "last_name", "email", "matricula"]:
-            if campo in self.fields:
+        self.puede_editar = puede_editar
+        if not puede_editar:
+            for campo in self.fields:
                 self.fields[campo].disabled = True
 
     def clean_first_name(self):

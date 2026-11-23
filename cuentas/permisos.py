@@ -38,11 +38,9 @@ PERMISOS_POR_GRUPO = {
         ("accesos", "registroacceso", "ver_historial"),
     ],
     GUARDIA: [
-        ("cuentas", "perfilusuario", "editar_propio_perfil"),
         ("accesos", "registroacceso", "escanear_acceso"),
     ],
     ALUMNO: [
-        ("cuentas", "perfilusuario", "editar_propio_perfil"),
         ("bicicletas", "bicicleta", "editar_propia_bicicleta"),
         ("bicicletas", "bicicleta", "ver_codigo_qr"),
     ],
@@ -88,7 +86,7 @@ def perfil_de(user):
 
 
 def es_solo_lectura(user):
-    """El modo no sustituye al permiso. El superusuario nunca queda en solo lectura."""
+    """El superusuario nunca queda en solo lectura. Un usuario en Admins con MODO_LECTURA actúa como auditor."""
     if not _sesion_valida(user) or getattr(user, "is_superuser", False):
         return False
     from cuentas.models import PerfilUsuario

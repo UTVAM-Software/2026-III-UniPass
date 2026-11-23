@@ -8,12 +8,14 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
-from cuentas.forms import NuevoUsuarioForm, PerfilForm
+from cuentas.forms import EditarUsuarioForm, NuevoUsuarioForm, PerfilForm
 from cuentas.models import PerfilUsuario
 from cuentas.permisos import (
     ADMINISTRADOR,
+    ALUMNO,
     EDITAR_PERFIL,
     GESTIONAR_USUARIOS,
+    es_solo_lectura,
     inicio_para,
     perfil_de,
     requiere,
@@ -142,6 +144,49 @@ def nuevo_usuario(request):
         return redirect("lista_usuarios")
 
     return render(request, "cuentas/nuevo_usuario.html", {"form": form})
+
+
+@requiere(GESTIONAR_USUARIOS)
+def editar_usuario(request, pk):
+    usuario = get_object_or_404(User, pk=pk, is_superuser=False)
+    if request.method == "POST":
+        bloqueo = respuesta_si_solo_lectura(request)
+        if bloqueo:
+            return bloqueo
+
+    perfil, _ = PerfilUsuario.objects.get_or_create(user=usuario)
+    grupo_actual = usuario.groups.first()
+    form = EditarUsuarioForm(
+        request.POST or None,
+        initial={
+            "first_name": usuario.first_name,
+            "last_name": usuario.last_name,
+            "email": usuario.email,
+            "matricula": perfil.matricula or "",
+            "tipo": grupo_actual.name if grupo_actual else ALUMNO,
+        },
+    )
+    if request.method == "POST" and form.is_valid():
+        grupo = Group.objects.filter(name=form.cleaned_data["tipo"]).first()
+        with transaction.atomic():
+            usuario.first_name = form.cleaned_data["first_name"]
+            usuario.last_name = form.cleaned_data["last_name"]
+            usuario.email = form.cleaned_data["email"]
+            usuario.save()
+            perfil.matricula = (form.cleaned_data.get("matricula") or "").strip() or None
+            perfil.save()
+            if grupo:
+                usuario.groups.set([grupo])
+        messages.success(request, f"Datos de {usuario.username} actualizados correctamente.")
+        return redirect("lista_usuarios")
+
+    return render(
+        request,
+        "cuentas/editar_usuario.html",
+        {"form": form, "usuario_editado": usuario},
+    )
+
+
 @require_POST
 @requiere(GESTIONAR_USUARIOS)
 def eliminar_usuario(request, pk):
@@ -171,21 +216,28 @@ def restablecer_clave_usuario(request, pk):
     )
     return redirect("lista_usuarios")
 
+
 @requiere(EDITAR_PERFIL)
 def editar_perfil(request):
+    es_admin_activo = request.user.has_perm(GESTIONAR_USUARIOS) and not es_solo_lectura(request.user)
+
     if request.method == "POST":
         bloqueo = respuesta_si_solo_lectura(request)
         if bloqueo:
             return bloqueo
+        if not es_admin_activo:
+            messages.error(request, "Solo los administradores pueden modificar la información del perfil.")
+            return redirect("editar_perfil")
+
     perfil = perfil_de(request.user)
     if perfil is None:
         perfil = PerfilUsuario.objects.create(user=request.user)
 
-    puede_editar_matricula = request.user.has_perm(GESTIONAR_USUARIOS)
     form = PerfilForm(
         request.POST or None,
         user=request.user,
-        puede_editar_matricula=puede_editar_matricula,
+        puede_editar=es_admin_activo,
+        puede_editar_matricula=es_admin_activo,
         initial={
             "first_name": request.user.first_name,
             "last_name": request.user.last_name,
@@ -201,12 +253,15 @@ def editar_perfil(request):
         if clave:
             request.user.set_password(clave)
         request.user.save()
-        if puede_editar_matricula:
-            perfil.matricula = (form.cleaned_data.get("matricula") or "").strip() or None
-            perfil.save()
+        perfil.matricula = (form.cleaned_data.get("matricula") or "").strip() or None
+        perfil.save()
         if clave:
             login(request, request.user)
         messages.success(request, "Perfil actualizado.")
         return redirect("editar_perfil")
 
-    return render(request, "cuentas/perfil.html", {"form": form})
+    return render(
+        request,
+        "cuentas/perfil.html",
+        {"form": form, "puede_editar_perfil": es_admin_activo},
+    )

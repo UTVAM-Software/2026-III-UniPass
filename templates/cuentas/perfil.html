@@ -13,12 +13,13 @@
                 {{ form.as_p }}
                 {% if solo_lectura %}
                 <p class="text-muted mb-0">Tu perfil está en solo lectura.</p>
-                {% else %}
+                {% elif puede_editar_perfil %}
                 <button type="submit" class="btn btn-primary">Guardar</button>
+                {% else %}
+                <p class="text-muted mb-0">Solo los administradores pueden modificar los datos del perfil.</p>
                 {% endif %}
             </form>
         </div>
     </div>
 </div>
-
 {% endblock %}
